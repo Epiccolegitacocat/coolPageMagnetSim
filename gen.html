@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Slither.io</title>
+    <style>
+        body {
+			cursor: none;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        
+        canvas {
+            background-color: #000;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <div id="score"></div>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const context = canvas.getContext('2d');
+
+        const gameWidth = 2000; // Larger game width
+        const gameHeight = 1500; // Larger game height
+
+        canvas.width = gameWidth;
+        canvas.height = gameHeight;
+
+        const foods = [];
+
+        function getRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        function createFood() {
+            const food = {
+                x: Math.random() * gameWidth,
+                y: Math.random() * gameHeight,
+                radius: 5,
+                color: getRandomColor()
+            };
+            foods.push(food);
+        }
+
+        function drawFood() {
+            for (let i = 0; i < foods.length; i++) {
+                const food = foods[i];
+                context.beginPath();
+                context.arc(food.x, food.y, food.radius, 0, Math.PI * 2);
+                context.fillStyle = food.color;
+                context.fill();
+                context.closePath();
+            }
+        }
+
+        function updateFood() {
+            const mouseX = event.clientX;
+            const mouseY = event.clientY;
+
+            for (let i = 0; i < foods.length; i++) {
+                const food = foods[i];
+                const dx = food.x - mouseX;
+                const dy = food.y - mouseY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                const moveSpeed = 1;
+                const moveX = (dx / distance) * moveSpeed;
+                const moveY = (dy / distance) * moveSpeed;
+
+                food.x += moveX;
+                food.y += moveY;
+
+                if (food.x - food.radius < 0 || food.x + food.radius > gameWidth) {
+                    food.x -= moveX;
+                }
+
+                if (food.y - food.radius < 0 || food.y + food.radius > gameHeight) {
+                    food.y -= moveY;
+                }
+            }
+        }
+
+        function draw() {
+            context.clearRect(0, 0, gameWidth, gameHeight);
+            drawFood();
+            requestAnimationFrame(draw);
+        }
+
+        document.addEventListener('mousemove', function(event) {
+            updateFood(event);
+        });
+
+        setInterval(createFood, 30);
+
+        createFood();
+        draw();
+    </script>
+</body>
+</html>
